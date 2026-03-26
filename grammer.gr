@@ -1,0 +1,14 @@
+1.0 S NP VP
+0.35 NP N
+0.4 NP Det N
+0.25 NP N N
+0.6 VP V NP
+0.4 VP V PP
+1.0 PP P NP
+1.0 Det the
+1.0 Det a
+0.4 N man
+0.4 N soldier
+0.4 N gun
+0.5 V shot
+1.0 P with
