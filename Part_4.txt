@@ -1,0 +1,21 @@
+1. Correctness: Tracking Derivations and Weights
+
+To ensure the parser always finds the most probable parse tree, the implementation relies on the Viterbi algorithm integrated into the Earley parsing process.
+
+    State Identity vs. Value: The code separates an item's "identity" from its "value." An item's identity is defined strictly by its structural position: the grammar rule, the dot position, the start index, and the end index. Its value consists of its weight (typically the negative log probability) and its backpointers (references to the specific child states that built it).
+
+    Tracking the Best Derivation: When the Predictor, Scanner, or Completer creates a new state, it calculates the new weight by summing the weights of its antecedents. Because we use negative log probabilities, a lower weight indicates a higher actual probability.
+
+    Reacting to Collisions: If an operation generates a derivation for an item that already exists in the chart (i.e., the identities match completely), the parser compares their weights. If the newly discovered derivation has a strictly lower weight than the existing one, the algorithm performs a "Viterbi update." It overwrites the existing item's weight and replaces its backpointers with the new ones, completely discarding the inferior derivation. It does not push a duplicate state to the agenda.
+
+2. Efficiency: Complexity Constraints
+
+The dynamic programming architecture guarantees the strict time and space bounds required.
+
+    O(n2) Space Complexity: The space is bounded by the maximum number of unique states the chart can hold. Since a state's identity is defined by its start index i and end index j (where 0≤i≤j≤n), there are at most O(n2) possible span combinations for any given rule. Because duplicate states are updated in place rather than stored as new entries, the space requirement never exceeds O(n2).
+
+    O(n3) Time Complexity: The time complexity is dominated by the Completer operation. The Completer searches for an active state spanning (i,j) and pairs it with a completed state spanning (j,k) to form a new state spanning (i,k). Because i, j, and k can each range from 0 to n, there are a maximum of O(n3) possible combinations to evaluate.
+
+    O(1) Agenda Pushes: To achieve O(1) time for pushing items and checking duplicates, the agenda (and chart) utilizes a Hash Map (a Python dictionary) rather than a simple List. The dictionary keys are the state identities. When a state is generated, checking if it already exists requires only a single hash lookup (O(1) average case), and updating its weight is also a direct O(1) assignment.
+
+    Why O(1) Pushes are Necessary: If the agenda relied on a list, checking for duplicates would require a linear scan of O(N) items for every single push operation. Since there are O(n3) operations attempting to push to the agenda, a linear scan would degrade the overall time complexity of the parser to O(n5) or worse, violating the efficiency requirements
